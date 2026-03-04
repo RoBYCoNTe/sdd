@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/media/logo.png" alt="SDD — Story Driven Development" width="200" />
+</p>
+
 # SDD — Story Driven Development
 
 **The Story is the source of truth. The code follows.**
