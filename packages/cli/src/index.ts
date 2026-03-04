@@ -8,13 +8,14 @@ import { registerValidate } from './commands/validate.js';
 import { registerMarkSynced } from './commands/mark-synced.js';
 import { registerCR } from './commands/cr.js';
 import { registerBug } from './commands/bug.js';
+import { registerApply } from './commands/apply.js';
 
 const program = new Command();
 
 program
   .name('sdd')
   .description('Story Driven Development — manage apps through structured documentation')
-  .version('1.0.0');
+  .version('1.0.1');
 
 registerInit(program);
 registerStatus(program);
@@ -24,6 +25,7 @@ registerValidate(program);
 registerMarkSynced(program);
 registerCR(program);
 registerBug(program);
+registerApply(program);
 
 program.parseAsync().catch((err) => {
   console.error(err.message);

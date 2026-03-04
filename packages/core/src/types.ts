@@ -58,6 +58,8 @@ export interface StoryStatus {
 export interface SDDConfig {
   description: string;
   'last-sync-commit'?: string;
+  agent?: string;
+  agents?: Record<string, string>;
 }
 
 export type ChangeRequestStatus = 'draft' | 'applied';

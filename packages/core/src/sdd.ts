@@ -4,6 +4,7 @@ import type { StoryStatus, ValidationResult, SDDConfig, ChangeRequest, Bug } fro
 import { ProjectNotInitializedError } from './errors.js';
 import { parseAllStoryFiles } from './parser/story-parser.js';
 import { generatePrompt } from './prompt/prompt-generator.js';
+import { generateApplyPrompt } from './prompt/apply-prompt-generator.js';
 import { validate } from './validate/validator.js';
 import { initProject } from './scaffold/init.js';
 import { isSDDProject, readConfig, writeConfig } from './config/config-manager.js';
@@ -50,6 +51,16 @@ export class SDD {
   async sync(): Promise<string> {
     const pending = await this.pending();
     return generatePrompt(pending, this.root);
+  }
+
+  async applyPrompt(): Promise<string | null> {
+    this.ensureInitialized();
+    const [bugs, changeRequests, pendingFiles] = await Promise.all([
+      this.openBugs(),
+      this.pendingChangeRequests(),
+      this.pending(),
+    ]);
+    return generateApplyPrompt(bugs, changeRequests, pendingFiles, this.root);
   }
 
   async validate(): Promise<ValidationResult> {

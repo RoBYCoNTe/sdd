@@ -19,4 +19,7 @@ export type {
 } from './types.js';
 export { SDDError, LockFileNotFoundError, ParseError, ProjectNotInitializedError } from './errors.js';
 export type { ProjectInfo } from './scaffold/templates.js';
-export { isSDDProject, readConfig } from './config/config-manager.js';
+export { isSDDProject, readConfig, writeConfig } from './config/config-manager.js';
+export { runAgent } from './agent/agent-runner.js';
+export type { AgentRunnerOptions } from './agent/agent-runner.js';
+export { DEFAULT_AGENTS, resolveAgentCommand } from './agent/agent-defaults.js';

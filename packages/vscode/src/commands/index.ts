@@ -9,6 +9,7 @@ const CLI_COMMANDS: Array<{ id: string; cliCommand: string; label: string }> = [
   { id: 'sdd.crList', cliCommand: 'sdd cr list', label: 'SDD: CR List' },
   { id: 'sdd.crPending', cliCommand: 'sdd cr pending', label: 'SDD: CR Pending' },
   { id: 'sdd.markCRApplied', cliCommand: 'sdd mark-cr-applied', label: 'SDD: Mark CR Applied' },
+  { id: 'sdd.apply', cliCommand: 'sdd apply', label: 'SDD: Apply' },
 ];
 
 export function registerCommands(context: vscode.ExtensionContext): void {

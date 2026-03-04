@@ -70,6 +70,21 @@ export function activate(context: vscode.ExtensionContext): void {
       statusBar.update();
     })
   );
+
+  // Refresh on external file changes (e.g. agent, git, terminal)
+  const watcher = vscode.workspace.createFileSystemWatcher('**/*.md');
+  const refreshAll = () => {
+    explorerProvider.refresh();
+    crExplorerProvider.refresh();
+    bugExplorerProvider.refresh();
+    statusBar.update();
+  };
+  context.subscriptions.push(
+    watcher,
+    watcher.onDidChange(refreshAll),
+    watcher.onDidCreate(refreshAll),
+    watcher.onDidDelete(refreshAll)
+  );
 }
 
 export function deactivate(): void {

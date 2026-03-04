@@ -1,6 +1,6 @@
 {
   "name": "sdd-vscode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "SDD - Story Driven Development",
   "description": "VSCode extension for Story Driven Development",
   "author": "Bruno Fortunato <bruno.fortunato@applica.guru>",
@@ -99,6 +99,10 @@
       {
         "command": "sdd.markBugResolved",
         "title": "SDD: Mark Bug Resolved"
+      },
+      {
+        "command": "sdd.apply",
+        "title": "SDD: Apply"
       }
     ],
     "menus": {

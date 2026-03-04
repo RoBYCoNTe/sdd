@@ -8,8 +8,12 @@ Initialize a new SDD project.
 
 ```bash
 sdd init my-project
-sdd init my-project --bootstrap   # generate a prompt to create initial docs
 ```
+
+Interactive wizard that asks:
+1. Project description
+2. Which agent to use (Claude Code, Codex, OpenCode, or custom)
+3. How to start: write docs manually, generate bootstrap prompt, or generate and apply automatically
 
 Creates the project directory with `.sdd/`, `product/`, `system/`, `code/`, `change-requests/`, `INSTRUCTIONS.md`, and agent pointer files.
 
@@ -95,6 +99,23 @@ sdd mark-cr-applied change-requests/CR-001.md
 # Mark all draft CRs
 sdd mark-cr-applied
 ```
+
+## Apply
+
+### `sdd apply [--agent <name>]`
+
+Run the full SDD workflow automatically using an external AI agent.
+Combines: bug fixing → CR processing → sync implementation.
+
+```bash
+# Use default agent (from config or "claude")
+sdd apply
+
+# Use a specific agent
+sdd apply --agent codex
+```
+
+The command generates a combined prompt with all open bugs, pending CRs, and pending files, then passes it to the selected agent for execution.
 
 ## Bugs
 

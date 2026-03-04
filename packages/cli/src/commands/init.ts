@@ -1,17 +1,36 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { input } from '@inquirer/prompts';
+import { input, select } from '@inquirer/prompts';
 import clipboardy from 'clipboardy';
 import { existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ora from 'ora';
-import { SDD } from '@applica-software-guru/sdd-core';
+import { SDD, writeConfig, runAgent } from '@applica-software-guru/sdd-core';
 import { printBanner } from '../ui/banner.js';
-import { success, info } from '../ui/format.js';
+import { success, info, heading } from '../ui/format.js';
+import { renderMarkdown } from '../ui/markdown.js';
 
 const START_PROMPT = `Read INSTRUCTIONS.md and the documentation in product/ and system/, then run \`sdd sync\` to start working.`;
 
-function buildBootstrapPrompt(description: string): string {
+function buildBootstrapPrompt(description: string, auto: boolean): string {
+  if (auto) {
+    return `Read INSTRUCTIONS.md first. This is a new SDD project.
+
+Project goal: "${description}"
+
+Your task: generate the initial documentation for this project based on the description above. Do NOT ask questions — infer reasonable defaults and create all documentation files directly:
+
+- product/vision.md — Product vision and goals
+- product/users.md — User personas
+- product/features/*.md — One file per main feature
+- system/entities.md — Data models (use ### headings per entity)
+- system/architecture.md — Architecture decisions
+- system/tech-stack.md — Technologies and frameworks
+- system/interfaces.md — API contracts
+
+Follow the file format described in INSTRUCTIONS.md for the YAML frontmatter. Do NOT write any code, only documentation. Commit all created files when done.`;
+  }
+
   return `Read INSTRUCTIONS.md first. This is a new SDD project.
 
 Project goal: "${description}"
@@ -33,8 +52,7 @@ export function registerInit(program: Command): void {
   program
     .command('init <project-name>')
     .description('Initialize a new SDD project')
-    .option('--bootstrap', 'Generate a prompt to create initial documentation with an agent')
-    .action(async (projectName: string, options) => {
+    .action(async (projectName: string) => {
       printBanner();
 
       const projectDir = resolve(process.cwd(), projectName);
@@ -44,18 +62,55 @@ export function registerInit(program: Command): void {
         return;
       }
 
+      const promptTheme = {
+        prefix: chalk.cyan('?'),
+        style: { message: (text: string) => chalk.cyan.bold(text) },
+      };
+
       const description = await input({
         message: 'What should your project do?',
-        theme: {
-          prefix: chalk.cyan('?'),
-          style: { message: (text: string) => chalk.cyan.bold(text) },
-        },
+        theme: promptTheme,
       });
 
       if (!description.trim()) {
         console.log(chalk.yellow('\n  No description provided. Aborting.\n'));
         return;
       }
+
+      const agentChoice = await select({
+        message: 'Which agent do you use?',
+        choices: [
+          { value: 'claude', name: 'Claude Code' },
+          { value: 'codex', name: 'Codex' },
+          { value: 'opencode', name: 'OpenCode' },
+          { value: 'other', name: 'Other' },
+        ],
+        theme: promptTheme,
+      });
+
+      let agentName = agentChoice;
+      let customCommand: string | undefined;
+
+      if (agentChoice === 'other') {
+        agentName = await input({
+          message: 'Agent name:',
+          theme: promptTheme,
+        });
+        customCommand = await input({
+          message: 'Agent command (use $PROMPT_FILE for the prompt file path):',
+          theme: promptTheme,
+        });
+      }
+
+      const bootstrapMode = await select({
+        message: 'How do you want to start?',
+        choices: [
+          { value: 'skip', name: 'Write docs manually' },
+          { value: 'prompt', name: 'Generate bootstrap prompt (copy to clipboard)' },
+          { value: 'auto', name: 'Generate and apply bootstrap automatically' },
+        ],
+        theme: promptTheme,
+      });
 
       if (!existsSync(projectDir)) {
         mkdirSync(projectDir, { recursive: true });
@@ -68,6 +123,14 @@ export function registerInit(program: Command): void {
 
       const sdd = new SDD({ root: projectDir });
       const files = await sdd.init({ description: description.trim() });
+
+      // Save agent config
+      const config = await sdd.config();
+      config.agent = agentName;
+      if (customCommand) {
+        config.agents = { [agentName]: customCommand };
+      }
+      await writeConfig(projectDir, config);
 
       spinner.stop();
 
@@ -84,31 +147,65 @@ export function registerInit(program: Command): void {
       console.log(success('system/'));
       console.log(success('code/'));
 
-      // Next steps
-      console.log(chalk.cyan.bold('\n  Next steps:\n'));
+      if (bootstrapMode === 'auto') {
+        const prompt = buildBootstrapPrompt(description.trim(), true);
 
-      console.log(`  ${chalk.white('1.')} Enter the project folder:\n`);
-      console.log(`     ${chalk.green(`cd ${projectName}`)}\n`);
+        console.log(chalk.dim('  ─'.repeat(30)));
+        console.log(heading('Agent Prompt'));
+        console.log(renderMarkdown(prompt));
+        console.log(chalk.dim('  ─'.repeat(30)));
 
-      if (options.bootstrap) {
-        console.log(`  ${chalk.white('2.')} Open your AI agent and paste the prompt below.`);
-        console.log(`     It will ask you a few questions and generate the initial docs.\n`);
-      } else {
-        console.log(`  ${chalk.white('2.')} Start writing your documentation in ${chalk.cyan('product/')} and ${chalk.cyan('system/')}.`);
-        console.log(`     Check ${chalk.cyan('INSTRUCTIONS.md')} for the file format.\n`);
+        console.log(info(`Using agent: ${chalk.cyan(agentName)}`));
+        console.log(info('Starting agent...\n'));
 
-        console.log(`  ${chalk.white('3.')} When ready, let your AI agent run:\n`);
-        console.log(`     ${chalk.green('sdd sync')}\n`);
+        const exitCode = await runAgent({
+          root: projectDir,
+          prompt,
+          agent: agentName,
+          agents: customCommand ? { [agentName]: customCommand } : undefined,
+        });
+
+        if (exitCode !== 0) {
+          console.log(chalk.red(`\n  Agent exited with code ${exitCode}`));
+          process.exit(exitCode);
+        }
+
+        console.log(chalk.green('\n  Agent completed successfully.'));
+        return;
       }
 
-      // Prompt
-      const prompt = options.bootstrap
-        ? buildBootstrapPrompt(description.trim())
-        : START_PROMPT;
+      if (bootstrapMode === 'prompt') {
+        const prompt = buildBootstrapPrompt(description.trim(), false);
 
-      console.log(chalk.dim('  ─'.repeat(30)));
-      console.log(chalk.cyan.bold('\n  Agent prompt:\n'));
-      console.log(chalk.white(`  ${prompt.split('\n').join('\n  ')}\n`));
+        console.log(chalk.cyan.bold('\n  Next steps:\n'));
+        console.log(`  ${chalk.white('1.')} Enter the project folder:\n`);
+        console.log(`     ${chalk.green(`cd ${projectName}`)}\n`);
+        console.log(`  ${chalk.white('2.')} Open your AI agent and paste the prompt below.`);
+        console.log(`     It will ask you a few questions and generate the initial docs.\n`);
+
+        console.log(chalk.dim('  ─'.repeat(30)));
+        console.log(heading('Agent Prompt'));
+        console.log(renderMarkdown(prompt));
+
+        try {
+          await clipboardy.write(prompt);
+          console.log(success('Copied to clipboard — paste it into your agent.\n'));
+        } catch {
+          console.log(info('Copy the prompt above into your agent.\n'));
+        }
+        return;
+      }
+
+      // skip — manual mode
+      console.log(chalk.cyan.bold('\n  Next steps:\n'));
+      console.log(`  ${chalk.white('1.')} Enter the project folder:\n`);
+      console.log(`     ${chalk.green(`cd ${projectName}`)}\n`);
+      console.log(`  ${chalk.white('2.')} Start writing your documentation in ${chalk.cyan('product/')} and ${chalk.cyan('system/')}.`);
+      console.log(`     Check ${chalk.cyan('INSTRUCTIONS.md')} for the file format.\n`);
+      console.log(`  ${chalk.white('3.')} When ready, let your AI agent run:\n`);
+      console.log(`     ${chalk.green('sdd sync')}\n`);
+
+      const prompt = START_PROMPT;
 
       try {
         await clipboardy.write(prompt);
