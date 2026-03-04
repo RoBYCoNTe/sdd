@@ -1,6 +1,6 @@
 {
   "name": "sdd-vscode",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "displayName": "SDD - Story Driven Development",
   "description": "VSCode extension for Story Driven Development",
   "author": "Bruno Fortunato <bruno.fortunato@applica.guru>",
@@ -42,6 +42,11 @@
           "id": "sdd.crExplorer",
           "name": "Change Requests",
           "when": "sdd:projectDetected"
+        },
+        {
+          "id": "sdd.bugExplorer",
+          "name": "Bugs",
+          "when": "sdd:projectDetected"
         }
       ]
     },
@@ -82,6 +87,18 @@
       {
         "command": "sdd.markCRApplied",
         "title": "SDD: Mark CR Applied"
+      },
+      {
+        "command": "sdd.bugList",
+        "title": "SDD: Bug List"
+      },
+      {
+        "command": "sdd.bugOpen",
+        "title": "SDD: Bug Open"
+      },
+      {
+        "command": "sdd.markBugResolved",
+        "title": "SDD: Mark Bug Resolved"
       }
     ],
     "menus": {
@@ -95,6 +112,11 @@
           "command": "sdd.refresh",
           "when": "view == sdd.crExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "sdd.refresh",
+          "when": "view == sdd.bugExplorer",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -105,12 +127,16 @@
         {
           "command": "sdd.markCRApplied",
           "when": "view == sdd.crExplorer && viewItem == draft"
+        },
+        {
+          "command": "sdd.markBugResolved",
+          "when": "view == sdd.bugExplorer && viewItem == open"
         }
       ]
     }
   },
   "dependencies": {
-    "@applica-software-guru/sdd-core": "^0.2.0"
+    "@applica-software-guru/sdd-core": "^1.0.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

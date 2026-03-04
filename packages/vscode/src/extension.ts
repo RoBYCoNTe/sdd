@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { StoryExplorerProvider } from './providers/story-explorer.js';
 import { CRExplorerProvider } from './providers/cr-explorer.js';
+import { BugExplorerProvider } from './providers/bug-explorer.js';
 import { StatusBarManager } from './providers/status-bar.js';
 import { applyDecorations, disposeDecorations } from './providers/decorations.js';
 import { registerCommands } from './commands/index.js';
@@ -18,6 +19,10 @@ export function activate(context: vscode.ExtensionContext): void {
   const crExplorerProvider = new CRExplorerProvider();
   vscode.window.registerTreeDataProvider('sdd.crExplorer', crExplorerProvider);
 
+  // Bug Explorer
+  const bugExplorerProvider = new BugExplorerProvider();
+  vscode.window.registerTreeDataProvider('sdd.bugExplorer', bugExplorerProvider);
+
   // Status bar
   const statusBar = new StatusBarManager();
   context.subscriptions.push({ dispose: () => statusBar.dispose() });
@@ -31,6 +36,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('sdd.refresh', () => {
       explorerProvider.refresh();
       crExplorerProvider.refresh();
+      bugExplorerProvider.refresh();
       statusBar.update();
     })
   );
@@ -60,6 +66,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidSaveTextDocument(() => {
       explorerProvider.refresh();
       crExplorerProvider.refresh();
+      bugExplorerProvider.refresh();
       statusBar.update();
     })
   );

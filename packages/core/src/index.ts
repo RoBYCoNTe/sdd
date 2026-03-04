@@ -13,6 +13,9 @@ export type {
   ChangeRequest,
   ChangeRequestFrontmatter,
   ChangeRequestStatus,
+  Bug,
+  BugFrontmatter,
+  BugStatus,
 } from './types.js';
 export { SDDError, LockFileNotFoundError, ParseError, ProjectNotInitializedError } from './errors.js';
 export type { ProjectInfo } from './scaffold/templates.js';

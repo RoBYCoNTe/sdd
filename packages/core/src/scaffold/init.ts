@@ -29,7 +29,7 @@ export async function initProject(root: string, info?: ProjectInfo): Promise<str
   createdFiles.push('.sdd/config.yaml');
 
   // Create directory structure
-  const dirs = ['product', 'product/features', 'system', 'code', 'change-requests'];
+  const dirs = ['product', 'product/features', 'system', 'code', 'change-requests', 'bugs'];
   for (const dir of dirs) {
     const absDir = resolve(root, dir);
     if (!existsSync(absDir)) {

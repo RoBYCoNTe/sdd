@@ -41,7 +41,7 @@ sdd sync
 
 The output includes:
 - List of files to process with their status
-- Git diff for `changed` files
+- `git diff` for `changed` files — shows exactly what was modified in the documentation since the last commit, so the agent can update only the affected code
 - Instructions for the agent
 
 ### `sdd mark-synced [files...]`
@@ -94,4 +94,34 @@ sdd mark-cr-applied change-requests/CR-001.md
 
 # Mark all draft CRs
 sdd mark-cr-applied
+```
+
+## Bugs
+
+### `sdd bug list`
+
+List all bugs with their status (open/resolved).
+
+```bash
+sdd bug list
+```
+
+### `sdd bug open`
+
+Show only open bugs. Use this to see what needs to be fixed.
+
+```bash
+sdd bug open
+```
+
+### `sdd mark-bug-resolved [files...]`
+
+Mark bugs as resolved after fixing the code/documentation.
+
+```bash
+# Mark specific bugs
+sdd mark-bug-resolved bugs/BUG-001.md
+
+# Mark all open bugs
+sdd mark-bug-resolved
 ```

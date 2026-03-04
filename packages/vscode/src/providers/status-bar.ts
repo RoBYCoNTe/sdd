@@ -20,10 +20,13 @@ export class StatusBarManager {
       const pendingCount = status.files.filter((f) => f.status !== 'synced').length;
       const pendingCRs = await sdd.pendingChangeRequests();
       const crCount = pendingCRs.length;
+      const openBugs = await sdd.openBugs();
+      const bugCount = openBugs.length;
 
       const parts: string[] = [];
       if (pendingCount > 0) parts.push(`${pendingCount} pending`);
       if (crCount > 0) parts.push(`${crCount} CR`);
+      if (bugCount > 0) parts.push(`${bugCount} bug`);
 
       if (parts.length > 0) {
         this.item.text = `$(book) SDD $(circle-filled) ${parts.join(' · ')}`;

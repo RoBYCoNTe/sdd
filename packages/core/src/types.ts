@@ -74,3 +74,18 @@ export interface ChangeRequest {
   frontmatter: ChangeRequestFrontmatter;
   body: string;
 }
+
+export type BugStatus = 'open' | 'resolved';
+
+export interface BugFrontmatter {
+  title: string;
+  status: BugStatus;
+  author: string;
+  'created-at': string;
+}
+
+export interface Bug {
+  relativePath: string;
+  frontmatter: BugFrontmatter;
+  body: string;
+}

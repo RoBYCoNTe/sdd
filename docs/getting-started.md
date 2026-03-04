@@ -28,6 +28,7 @@ my-project/
   system/                   # how to build it
   code/                     # generated source code
   change-requests/          # change requests
+  bugs/                     # bug reports
 ```
 
 The `--bootstrap` flag generates a prompt that asks an AI agent to create the initial documentation for you:

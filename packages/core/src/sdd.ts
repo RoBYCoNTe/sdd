@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import type { StoryStatus, ValidationResult, SDDConfig, ChangeRequest } from './types.js';
+import type { StoryStatus, ValidationResult, SDDConfig, ChangeRequest, Bug } from './types.js';
 import { ProjectNotInitializedError } from './errors.js';
 import { parseAllStoryFiles } from './parser/story-parser.js';
 import { generatePrompt } from './prompt/prompt-generator.js';
@@ -8,6 +8,7 @@ import { validate } from './validate/validator.js';
 import { initProject } from './scaffold/init.js';
 import { isSDDProject, readConfig, writeConfig } from './config/config-manager.js';
 import { parseAllCRFiles } from './parser/cr-parser.js';
+import { parseAllBugFiles } from './parser/bug-parser.js';
 import type { ProjectInfo } from './scaffold/templates.js';
 
 export class SDD {
@@ -110,6 +111,35 @@ export class SDD {
       const updated = content.replace(/^status:\s*draft/m, 'status: applied');
       await writeFile(absPath, updated, 'utf-8');
       marked.push(cr.relativePath);
+    }
+
+    return marked;
+  }
+
+  async bugs(): Promise<Bug[]> {
+    this.ensureInitialized();
+    return parseAllBugFiles(this.root);
+  }
+
+  async openBugs(): Promise<Bug[]> {
+    const all = await this.bugs();
+    return all.filter((b) => b.frontmatter.status === 'open');
+  }
+
+  async markBugResolved(paths?: string[]): Promise<string[]> {
+    this.ensureInitialized();
+    const all = await this.bugs();
+    const marked: string[] = [];
+
+    for (const bug of all) {
+      if (bug.frontmatter.status === 'resolved') continue;
+      if (paths && paths.length > 0 && !paths.includes(bug.relativePath)) continue;
+
+      const absPath = resolve(this.root, bug.relativePath);
+      const content = await readFile(absPath, 'utf-8');
+      const updated = content.replace(/^status:\s*open/m, 'status: resolved');
+      await writeFile(absPath, updated, 'utf-8');
+      marked.push(bug.relativePath);
     }
 
     return marked;

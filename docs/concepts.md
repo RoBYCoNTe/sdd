@@ -29,8 +29,10 @@ new → synced → changed → synced → ...
 | `synced` | Already implemented, up to date |
 
 - `sdd sync` generates a prompt for all files that are **not** `synced`
+- For `changed` files, `sdd sync` uses `git diff` to show exactly what changed in the documentation since the last commit — the agent sees the diff and updates only the affected code
 - `sdd mark-synced` sets pending files to `synced`
 - The VS Code extension automatically sets `synced` → `changed` when you edit and save a file
+- **Committing after every mark-synced is mandatory** — the git history is what SDD uses to detect changes
 
 ## Frontmatter
 
@@ -110,6 +112,7 @@ my-project/
     interfaces.md
   code/                     # all generated source code
   change-requests/          # change requests
+  bugs/                     # bug reports
   INSTRUCTIONS.md           # agent instructions (auto-generated)
 ```
 

@@ -49,10 +49,25 @@ function getSDDRoot(filePath: string): string | null {
   return null;
 }
 
-function isInSDDFolder(filePath: string, sddRoot: string): 'story' | 'cr' | null {
+function bugFrontmatter(fileName: string): string {
+  const title = path.basename(fileName, '.md').replace(/[-_]/g, ' ');
+  const now = new Date().toISOString();
+  const author = getGitAuthor();
+  return `---
+title: "${title}"
+status: open
+author: "${author}"
+created-at: "${now}"
+---
+
+`;
+}
+
+function isInSDDFolder(filePath: string, sddRoot: string): 'story' | 'cr' | 'bug' | null {
   const rel = path.relative(sddRoot, filePath);
   if (rel.startsWith('product/') || rel.startsWith('system/')) return 'story';
   if (rel.startsWith('change-requests/')) return 'cr';
+  if (rel.startsWith('bugs/')) return 'bug';
   return null;
 }
 
@@ -74,6 +89,8 @@ export function registerOnCreateListener(context: vscode.ExtensionContext): void
 
         const header = kind === 'cr'
           ? crFrontmatter(path.basename(file.fsPath))
+          : kind === 'bug'
+          ? bugFrontmatter(path.basename(file.fsPath))
           : storyFrontmatter(path.basename(file.fsPath));
 
         const edit = new vscode.WorkspaceEdit();
