@@ -77,6 +77,7 @@ The key difference from other spec-driven tools is scope and lifecycle: SDD cove
 - [Change Requests](docs/change-requests.md) — structured change management
 - [UX & Screenshots](docs/ux-screenshots.md) — managing mockups and visual assets
 - [VS Code Extension](docs/vscode-extension.md) — sidebar, status bar, auto-frontmatter
+- [Homebrew Release Workflow](docs/homebrew-release-workflow.md) — how npm release syncs to Homebrew tap
 
 ## Packages
 
@@ -88,13 +89,16 @@ The key difference from other spec-driven tools is scope and lifecycle: SDD cove
 
 ## Maintainers
 
-Homebrew sync is automated via GitHub Actions.
+Release publish and Homebrew sync are automated via GitHub Actions.
 
-When a GitHub Release is published, `.github/workflows/sync-homebrew-tap.yml` updates `Formula/sdd.rb` in the tap repository (`applica-software-guru/homebrew-sdd`).
+When a GitHub Release is published, `.github/workflows/sync-homebrew-tap.yml` publishes `@applica-software-guru/sdd` to npm and then updates `Formula/sdd.rb` in the tap repository (`applica-software-guru/homebrew-sdd`).
 
 Required secret in this repository:
 
+- `NPM_TOKEN`: npm automation token for publishing `@applica-software-guru/sdd`
 - `HOMEBREW_TAP_TOKEN`: GitHub token with write access to `applica-software-guru/homebrew-sdd`
+
+See [Homebrew Release Workflow](docs/homebrew-release-workflow.md) for release order, manual dispatch, and troubleshooting.
 
 ## Author
 
