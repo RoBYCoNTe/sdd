@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { createRequire } from 'node:module';
 import { registerInit } from './commands/init.js';
 import { registerStatus } from './commands/status.js';
 import { registerDiff } from './commands/diff.js';
@@ -10,12 +11,15 @@ import { registerCR } from './commands/cr.js';
 import { registerBug } from './commands/bug.js';
 import { registerApply } from './commands/apply.js';
 
+const require = createRequire(__filename);
+const packageJson = require('../package.json') as { version: string };
+
 const program = new Command();
 
 program
   .name('sdd')
   .description('Story Driven Development — manage apps through structured documentation')
-  .version('1.0.1');
+  .version(packageJson.version);
 
 registerInit(program);
 registerStatus(program);
