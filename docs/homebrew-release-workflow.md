@@ -34,6 +34,20 @@ It resolves version, optionally publishes npm, computes SHA256 from npm tarball,
 4. Verify workflow `Publish npm and Sync Homebrew Tap` is green
 5. Verify formula in tap points to `sdd-X.Y.Z.tgz`
 
+## Release day (quick checklist)
+
+Use this minimal sequence every time:
+
+1. `git checkout main && git pull --ff-only`
+2. Bump CLI version in `packages/cli/package.json`
+3. `git add packages/cli/package.json package-lock.json && git commit -m "chore: bump cli version to X.Y.Z"`
+4. `git push origin main`
+5. `gh release create vX.Y.Z --target main --title "vX.Y.Z" --generate-notes`
+6. Check Actions run is green, then verify:
+	- `npm view @applica-software-guru/sdd version`
+	- formula in `applica-software-guru/homebrew-sdd`
+	- `brew update && brew upgrade sdd && sdd --version`
+
 ## Manual test / fallback
 
 From repo root:
