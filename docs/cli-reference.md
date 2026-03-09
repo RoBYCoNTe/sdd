@@ -11,6 +11,7 @@ sdd init my-project
 ```
 
 Interactive wizard that asks:
+
 1. Project description
 2. Which agent to use (Claude Code, Codex, OpenCode, or custom)
 3. How to start: write docs manually, generate bootstrap prompt, or generate and apply automatically
@@ -33,6 +34,7 @@ sdd adapters sync --all --dry-run
 ```
 
 Useful options:
+
 - `--all` — configure all supported adapters
 - `--agents <list>` — configure only specific adapters
 - `--dry-run` — print planned changes only
@@ -73,6 +75,7 @@ sdd sync
 ```
 
 The output includes:
+
 - List of files to process with their status
 - `git diff` for `changed` files — shows exactly what was modified in the documentation since the last commit, so the agent can update only the affected code
 - Instructions for the agent
