@@ -24,13 +24,13 @@ export function SpecPanel({ config }: Props) {
   const activePath = screenshotPaths[activeIdx] ?? screenshotPaths[0];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#111' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Tab bar — only when multiple screenshots */}
       {screenshotPaths.length > 1 && (
         <div style={{
           display: 'flex',
-          borderBottom: '1px solid #1e1e1e',
-          background: '#161616',
+          borderBottom: '1px solid #e0e0e0',
+          background: '#f0f0f0',
           flexShrink: 0,
           overflowX: 'auto',
         }}>
@@ -41,11 +41,11 @@ export function SpecPanel({ config }: Props) {
                 key={i}
                 onClick={() => setActiveIdx(i)}
                 style={{
-                  padding: '0 16px',
-                  height: '36px',
+                  padding: '0 14px',
+                  height: '32px',
                   fontSize: '12px',
                   fontWeight: active ? 600 : 400,
-                  color: active ? '#e2e2e2' : '#555',
+                  color: active ? '#111' : '#999',
                   background: 'none',
                   border: 'none',
                   borderBottom: active ? '2px solid #3b82f6' : '2px solid transparent',
@@ -70,7 +70,7 @@ export function SpecPanel({ config }: Props) {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        background: '#111',
+        background: '#f5f5f5',
       }}>
         <img
           key={activePath}
@@ -81,8 +81,8 @@ export function SpecPanel({ config }: Props) {
             height: 'auto',
             display: 'block',
             borderRadius: '6px',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-            border: '1px solid #2a2a2a',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+            border: '1px solid #e5e5e5',
           }}
         />
       </div>

@@ -7,7 +7,6 @@ interface Props {
 
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
-    padding: '24px',
     minHeight: '100%',
     background: '#fff',
     color: '#000',
