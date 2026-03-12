@@ -9,7 +9,6 @@ import { SDD, writeConfig, runAgent } from "@applica-software-guru/sdd-core";
 import { printBanner } from "../ui/banner.js";
 import { success, info, heading } from "../ui/format.js";
 import { renderMarkdown } from "../ui/markdown.js";
-import { installSkills } from "../skills.js";
 
 const START_PROMPT = `Read .sdd/skill/sdd/SKILL.md (fallback: .claude/skills/sdd/SKILL.md) and the documentation in product/ and system/, then run \`sdd sync\` to start working.`;
 
@@ -59,7 +58,11 @@ export function registerInit(program: Command): void {
       const projectDir = resolve(process.cwd(), projectName);
 
       if (existsSync(resolve(projectDir, ".sdd"))) {
-        console.log(chalk.yellow(`\n  SDD project already initialized at ${projectName}/\n`));
+        console.log(
+          chalk.yellow(
+            `\n  SDD project already initialized at ${projectName}/\n`,
+          ),
+        );
         return;
       }
 
@@ -107,7 +110,10 @@ export function registerInit(program: Command): void {
         message: "How do you want to start?",
         choices: [
           { value: "skip", name: "Write docs manually" },
-          { value: "prompt", name: "Generate bootstrap prompt (copy to clipboard)" },
+          {
+            value: "prompt",
+            name: "Generate bootstrap prompt (copy to clipboard)",
+          },
           { value: "auto", name: "Generate and apply bootstrap automatically" },
         ],
         theme: promptTheme,
@@ -125,8 +131,6 @@ export function registerInit(program: Command): void {
       const sdd = new SDD({ root: projectDir });
       const files = await sdd.init({ description: description.trim() });
 
-      installSkills(projectDir);
-
       // Save agent config
       const config = await sdd.config();
       config.agent = agentName;
@@ -138,7 +142,9 @@ export function registerInit(program: Command): void {
       spinner.stop();
 
       // Project created
-      console.log(chalk.cyan.bold(`\n  ${chalk.white(projectName)} is ready!\n`));
+      console.log(
+        chalk.cyan.bold(`\n  ${chalk.white(projectName)} is ready!\n`),
+      );
 
       // Show what was created
       console.log(chalk.dim("  Created:"));
@@ -184,8 +190,12 @@ export function registerInit(program: Command): void {
         console.log(chalk.cyan.bold("\n  Next steps:\n"));
         console.log(`  ${chalk.white("1.")} Enter the project folder:\n`);
         console.log(`     ${chalk.green(`cd ${projectName}`)}\n`);
-        console.log(`  ${chalk.white("2.")} Open your AI agent and paste the prompt below.`);
-        console.log(`     It will ask you a few questions and generate the initial docs.\n`);
+        console.log(
+          `  ${chalk.white("2.")} Open your AI agent and paste the prompt below.`,
+        );
+        console.log(
+          `     It will ask you a few questions and generate the initial docs.\n`,
+        );
 
         console.log(chalk.dim("  ─".repeat(30)));
         console.log(heading("Agent Prompt"));
@@ -193,7 +203,9 @@ export function registerInit(program: Command): void {
 
         try {
           await clipboardy.write(prompt);
-          console.log(success("Copied to clipboard — paste it into your agent.\n"));
+          console.log(
+            success("Copied to clipboard — paste it into your agent.\n"),
+          );
         } catch {
           console.log(info("Copy the prompt above into your agent.\n"));
         }
@@ -207,15 +219,21 @@ export function registerInit(program: Command): void {
       console.log(
         `  ${chalk.white("2.")} Start writing your documentation in ${chalk.cyan("product/")} and ${chalk.cyan("system/")}.`,
       );
-      console.log(`     Check ${chalk.cyan(".sdd/skill/sdd/SKILL.md")} for the workflow.\n`);
-      console.log(`  ${chalk.white("3.")} When ready, let your AI agent run:\n`);
+      console.log(
+        `     Check ${chalk.cyan(".sdd/skill/sdd/SKILL.md")} for the workflow.\n`,
+      );
+      console.log(
+        `  ${chalk.white("3.")} When ready, let your AI agent run:\n`,
+      );
       console.log(`     ${chalk.green("sdd sync")}\n`);
 
       const prompt = START_PROMPT;
 
       try {
         await clipboardy.write(prompt);
-        console.log(success("Copied to clipboard — paste it into your agent.\n"));
+        console.log(
+          success("Copied to clipboard — paste it into your agent.\n"),
+        );
       } catch {
         console.log(info("Copy the prompt above into your agent.\n"));
       }

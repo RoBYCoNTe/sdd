@@ -7,7 +7,11 @@ import { execSync } from "node:child_process";
 import { SDD } from "../src/sdd.js";
 
 function git(cmd: string, cwd: string): string {
-  return execSync(`git ${cmd}`, { cwd, encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }).trim();
+  return execSync(`git ${cmd}`, {
+    cwd,
+    encoding: "utf-8",
+    stdio: ["pipe", "pipe", "pipe"],
+  }).trim();
 }
 
 const VISION_MD = `---
@@ -47,13 +51,27 @@ describe("SDD integration", () => {
     expect(existsSync(join(tempDir, "system"))).toBe(true);
     expect(existsSync(join(tempDir, "code"))).toBe(true);
     expect(existsSync(join(tempDir, ".sdd/skill/sdd/SKILL.md"))).toBe(true);
-    expect(existsSync(join(tempDir, ".sdd/skill/sdd/references/file-format.md"))).toBe(true);
-    expect(existsSync(join(tempDir, ".sdd/skill/sdd/references/change-requests.md"))).toBe(true);
-    expect(existsSync(join(tempDir, ".sdd/skill/sdd/references/bugs.md"))).toBe(true);
+    expect(
+      existsSync(join(tempDir, ".sdd/skill/sdd/references/file-format.md")),
+    ).toBe(true);
+    expect(
+      existsSync(join(tempDir, ".sdd/skill/sdd/references/change-requests.md")),
+    ).toBe(true);
+    expect(existsSync(join(tempDir, ".sdd/skill/sdd/references/bugs.md"))).toBe(
+      true,
+    );
     expect(existsSync(join(tempDir, ".claude/skills/sdd/SKILL.md"))).toBe(true);
-    expect(existsSync(join(tempDir, ".claude/skills/sdd/references/file-format.md"))).toBe(true);
-    expect(existsSync(join(tempDir, ".claude/skills/sdd/references/change-requests.md"))).toBe(true);
-    expect(existsSync(join(tempDir, ".claude/skills/sdd/references/bugs.md"))).toBe(true);
+    expect(
+      existsSync(join(tempDir, ".claude/skills/sdd/references/file-format.md")),
+    ).toBe(true);
+    expect(
+      existsSync(
+        join(tempDir, ".claude/skills/sdd/references/change-requests.md"),
+      ),
+    ).toBe(true);
+    expect(
+      existsSync(join(tempDir, ".claude/skills/sdd/references/bugs.md")),
+    ).toBe(true);
 
     const config = await sdd.config();
     expect(config.description).toBe("A test app");
@@ -145,11 +163,13 @@ describe("SDD integration", () => {
     const sdd = new SDD({ root: tempDir });
     await sdd.init({ description: "test" });
 
-    const dryRun = await sdd.syncAdapters({ agents: ["copilot"], dryRun: true });
-    expect(dryRun.selectedAgents).toEqual(["copilot"]);
-    expect(dryRun.adapters.some((c) => c.path === ".github/copilot-instructions.md")).toBe(true);
+    const dryRun = await sdd.syncAdapters({ agents: ["claude"], dryRun: true });
+    expect(dryRun.selectedAgents).toEqual(["claude"]);
+    expect(
+      dryRun.adapters.some((c) => c.path === ".claude/skills/sdd/SKILL.md"),
+    ).toBe(true);
 
-    await sdd.syncAdapters({ agents: ["copilot"] });
-    expect(existsSync(join(tempDir, ".github/copilot-instructions.md"))).toBe(true);
+    await sdd.syncAdapters({ agents: ["claude"] });
+    expect(existsSync(join(tempDir, ".claude/skills/sdd/SKILL.md"))).toBe(true);
   });
 });

@@ -10,7 +10,9 @@ function parseAgents(value: string): string[] {
 }
 
 export function registerAdapters(program: Command): void {
-  const adapters = program.command("adapters").description("Manage AI agent skill adapters");
+  const adapters = program
+    .command("adapters")
+    .description("Manage AI agent skill adapters");
 
   adapters
     .command("list")
@@ -19,8 +21,11 @@ export function registerAdapters(program: Command): void {
       console.log(heading("Supported Adapters"));
       for (const adapter of SKILL_ADAPTERS) {
         console.log(info(`${adapter.id} (${adapter.mode})`));
-        for (const path of adapter.paths) {
-          console.log(`  - ${path}`);
+        for (const skill of adapter.skills) {
+          console.log(`  ${skill.skillId}:`);
+          for (const path of skill.paths) {
+            console.log(`    - ${path}`);
+          }
         }
       }
       console.log("");
@@ -29,54 +34,75 @@ export function registerAdapters(program: Command): void {
   adapters
     .command("sync")
     .description("Create or update skill adapters for supported agents")
-    .option("--agents <list>", "Comma-separated adapter ids (for example: claude,copilot,cursor)")
+    .option(
+      "--agents <list>",
+      "Comma-separated adapter ids (for example: claude,copilot,cursor)",
+    )
     .option("--all", "Configure all supported adapters")
     .option("--dry-run", "Show what would change without writing files")
     .option("--force", "Overwrite existing adapter files when content differs")
-    .action(async (options: { agents?: string; all?: boolean; dryRun?: boolean; force?: boolean }) => {
-      const sdd = new SDD({ root: process.cwd() });
-      const supported = sdd.supportedAdapters();
-      const selectedAgents = options.all || !options.agents ? undefined : parseAgents(options.agents);
+    .action(
+      async (options: {
+        agents?: string;
+        all?: boolean;
+        dryRun?: boolean;
+        force?: boolean;
+      }) => {
+        const sdd = new SDD({ root: process.cwd() });
+        const supported = sdd.supportedAdapters();
+        const selectedAgents =
+          options.all || !options.agents
+            ? undefined
+            : parseAgents(options.agents);
 
-      if (selectedAgents && selectedAgents.length === 0) {
-        console.log(warning("No valid adapter id was provided."));
+        if (selectedAgents && selectedAgents.length === 0) {
+          console.log(warning("No valid adapter id was provided."));
+          console.log(info(`Supported adapters: ${supported.join(", ")}`));
+          return;
+        }
+
+        const result = await sdd.syncAdapters({
+          agents: selectedAgents,
+          dryRun: options.dryRun,
+          force: options.force,
+        });
+
+        const allChanges = [...result.canonical, ...result.adapters];
+        const created = allChanges.filter((c) => c.action === "created");
+        const updated = allChanges.filter((c) => c.action === "updated");
+        const skipped = allChanges.filter((c) => c.action === "skipped");
+
+        console.log(heading("Adapters Sync"));
+        console.log(info(`Selected: ${result.selectedAgents.join(", ")}`));
+        if (options.dryRun) {
+          console.log(info("Dry run mode enabled. No files were written."));
+        }
+        console.log("");
+
+        for (const change of created) {
+          console.log(success(change.path));
+        }
+        for (const change of updated) {
+          console.log(success(`${change.path} (updated)`));
+        }
+        for (const change of skipped) {
+          const reason = change.reason ? ` — ${change.reason}` : "";
+          console.log(warning(`${change.path}${reason}`));
+        }
+
+        console.log("");
+        console.log(
+          info(
+            `Created: ${created.length}  Updated: ${updated.length}  Skipped: ${skipped.length}`,
+          ),
+        );
         console.log(info(`Supported adapters: ${supported.join(", ")}`));
-        return;
-      }
-
-      const result = await sdd.syncAdapters({
-        agents: selectedAgents,
-        dryRun: options.dryRun,
-        force: options.force,
-      });
-
-      const allChanges = [...result.canonical, ...result.adapters];
-      const created = allChanges.filter((c) => c.action === "created");
-      const updated = allChanges.filter((c) => c.action === "updated");
-      const skipped = allChanges.filter((c) => c.action === "skipped");
-
-      console.log(heading("Adapters Sync"));
-      console.log(info(`Selected: ${result.selectedAgents.join(", ")}`));
-      if (options.dryRun) {
-        console.log(info("Dry run mode enabled. No files were written."));
-      }
-      console.log("");
-
-      for (const change of created) {
-        console.log(success(change.path));
-      }
-      for (const change of updated) {
-        console.log(success(`${change.path} (updated)`));
-      }
-      for (const change of skipped) {
-        const reason = change.reason ? ` — ${change.reason}` : "";
-        console.log(warning(`${change.path}${reason}`));
-      }
-
-      console.log("");
-      console.log(info(`Created: ${created.length}  Updated: ${updated.length}  Skipped: ${skipped.length}`));
-      console.log(info(`Supported adapters: ${supported.join(", ")}`));
-      console.log(info("Run `sdd adapters list` to inspect adapter modes and target paths."));
-      console.log("");
-    });
+        console.log(
+          info(
+            "Run `sdd adapters list` to inspect adapter modes and target paths.",
+          ),
+        );
+        console.log("");
+      },
+    );
 }
